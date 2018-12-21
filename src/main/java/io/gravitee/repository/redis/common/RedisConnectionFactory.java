@@ -20,8 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
@@ -40,11 +44,29 @@ public class RedisConnectionFactory implements FactoryBean<org.springframework.d
         this.propertyPrefix = propertyPrefix + ".redis.";
     }
 
+
     @Override
     public org.springframework.data.redis.connection.RedisConnectionFactory getObject() throws Exception {
-        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
-        jedisConnectionFactory.setHostName(readPropertyValue(propertyPrefix + "host", String.class, "localhost"));
-        jedisConnectionFactory.setPort(readPropertyValue(propertyPrefix + "port", int.class, 6379));
+
+        JedisConnectionFactory jedisConnectionFactory = null;
+
+        // Redis Sentinel configuration
+        String redisSentinels = readPropertyValue(propertyPrefix + "sentinels", String.class, null);
+        String sentinelMaster = readPropertyValue(propertyPrefix + "master", String.class, "mymaster");
+        if (redisSentinels != null) {
+            Set sentinels = new HashSet();
+            for (String sentinel : redisSentinels.split(",")) {
+                sentinels.add(sentinel);
+            }
+            RedisSentinelConfiguration sentinelConf = new RedisSentinelConfiguration("mymaster", sentinels);
+            jedisConnectionFactory = new JedisConnectionFactory(sentinelConf);
+        }
+        else {
+            jedisConnectionFactory = new JedisConnectionFactory();
+            jedisConnectionFactory.setHostName(readPropertyValue(propertyPrefix + "host", String.class, "localhost"));
+            jedisConnectionFactory.setPort(readPropertyValue(propertyPrefix + "port", int.class, 6379));
+        }
+
         jedisConnectionFactory.setPassword(readPropertyValue(propertyPrefix + "password", String.class, null));
         jedisConnectionFactory.setTimeout(readPropertyValue(propertyPrefix + "timeout", int.class, -1));
 

@@ -33,11 +33,21 @@ Unzip the gravitee-repository-redis-1.20.0-SNAPSHOT.zip in the gravitee home dir
 
 == Configuration
 
-  repository.redis options :
+  repository.redis options for Redis server :
 
   | Parameter                                        |   default  |
   | ------------------------------------------------ | ---------: |
   | host                                             |  localhost |
   | port                                             |      6379  |
+  | password                                         |            |
+  | timeout                                          |        -1  |
+
+
+  repository.redis options for Redis Sentinel server :
+
+  | Parameter                                        |   default  |
+  | ------------------------------------------------ | ---------: |
+  | sentinels                                        |            |
+  | master                                           |  mymaster  |
   | password                                         |            |
   | timeout                                          |        -1  |
