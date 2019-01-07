@@ -18,7 +18,6 @@ package io.gravitee.repository.redis.management;
 import io.gravitee.repository.config.TestRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
 import redis.embedded.RedisSentinel;
 import redis.embedded.RedisServer;
 
@@ -29,8 +28,8 @@ import java.net.InetAddress;
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-@Conditional(RedisCondition.class)
-public class RedisTestRepositoryConfiguration extends ManagementRepositoryConfiguration {
+@Conditional(SentinelCondition.class)
+public class SentinelTestRepositoryConfiguration extends ManagementRepositoryConfiguration {
 
     @Bean
     public TestRepositoryInitializer testRepositoryInitializer() {
@@ -42,6 +41,19 @@ public class RedisTestRepositoryConfiguration extends ManagementRepositoryConfig
         final RedisServer redisServer = new RedisServer();
         redisServer.start();
         return redisServer;
+    }
+
+    @Bean(destroyMethod = "stop")
+    public RedisSentinel redisSentinel() throws IOException {
+        final RedisSentinel redisSentinel = RedisSentinel.builder()
+                .port(26379)
+                .setting(String.format("sentinel monitor %s %s %s 1", "mymaster", InetAddress.getLocalHost().getHostAddress(), 6379))
+                .setting(String.format("sentinel down-after-milliseconds %s 200", "mymaster"))
+                .setting(String.format("sentinel failover-timeout %s 1000", "mymaster"))
+                .build();
+
+        redisSentinel.start();
+        return redisSentinel;
     }
 
 }

@@ -167,6 +167,45 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Xmx1024m</argLine>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-test</id>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+					<execution>
+                        <id>redis</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <redisType>redis</redisType>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+					<!--
+                    <execution>
+                        <id>sentinel</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <redisType>sentinel</redisType>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                    -->
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
