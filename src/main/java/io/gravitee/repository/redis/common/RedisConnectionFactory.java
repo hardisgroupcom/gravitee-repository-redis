@@ -53,12 +53,13 @@ public class RedisConnectionFactory implements FactoryBean<org.springframework.d
         // Redis Sentinel configuration
         String redisSentinels = readPropertyValue(propertyPrefix + "sentinels", String.class, null);
         String sentinelMaster = readPropertyValue(propertyPrefix + "master", String.class, "mymaster");
+
         if (redisSentinels != null) {
             Set sentinels = new HashSet();
             for (String sentinel : redisSentinels.split(",")) {
                 sentinels.add(sentinel);
             }
-            RedisSentinelConfiguration sentinelConf = new RedisSentinelConfiguration("mymaster", sentinels);
+            RedisSentinelConfiguration sentinelConf = new RedisSentinelConfiguration(sentinelMaster, sentinels);
             jedisConnectionFactory = new JedisConnectionFactory(sentinelConf);
         }
         else {
